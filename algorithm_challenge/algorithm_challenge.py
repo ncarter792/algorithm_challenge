@@ -113,9 +113,9 @@ def translate_dna(s: str) -> Iterator[int]:
     """Translate string characters to node child indexes.
 
     Examples:
-        >>> translate_dna('C')
-        1
-        >>> list(translate_dna('CAA')
+        >>> list(translate_dna('C'))
+        [1]
+        >>> list(translate_dna('CAA'))
         [1, 0, 0]
 
     """
@@ -124,7 +124,15 @@ def translate_dna(s: str) -> Iterator[int]:
 
 
 def traverse(node: DnaBagNode) -> Iterable[Tuple[str, DnaBagNode]]:
-    """Traverse the layers of the trie yielding base, node tuples."""
+    """Traverse the layers of the trie yielding base, node tuples.
+    
+    Args: 
+        node: node to begin traverse 
+    
+    Yields: 
+        tuples of base and child node 
+    
+    """
     for base, child in zip('ACGTN', node.children):
         if child:
             yield (base, child)
@@ -134,12 +142,11 @@ def traverse(node: DnaBagNode) -> Iterable[Tuple[str, DnaBagNode]]:
 def process_strings(strings: Iterable[str], targets: Iterable[str]) -> Tuple[int, int]:
     """Calculate processed string target count.
 
-    # FIXME - Doctest failing.
     Example:
-    >>> strings = ['ACTG', 'AACT', 'TCAGG', 'TTGGA']
-    >>> targets = ['C', 'G']
-    >>> process_strings(strings, targets)
-    (8, 18)
+        >>> strings = ['ACTG', 'AACT', 'TCAGG', 'TTGGA']
+        >>> targets = ['C', 'G']
+        >>> process_strings(strings, targets)
+        (8, 18)
 
     Args:
         strings: list of DNA strings
@@ -159,7 +166,7 @@ def process_strings(strings: Iterable[str], targets: Iterable[str]) -> Tuple[int
 
 
 def run() -> None:
-    """Recipe function."""
+    """Generate a fractional count of target bases given a list of strings."""
     dna_strings = ['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG']
     targets     = ['A', 'T']
 

@@ -103,10 +103,13 @@ def test_traverse(test_strs: Iterable[str], expected_counts: Dict[str, int]) -> 
     (['AA'],      ['A'], (2, 2)),
     (['AA'],      ['C'], (0, 2)),
     (['AA', 'A'], ['A'], (3, 3)),
-    (['A', 'T'],  ['A', 'T'],  (2, 2)),
-    (['AA', 'A', 'TA'], ['T'], (1, 5)),
-    (['AAC', 'AA', 'TG', 'C'], ['T', 'C'], (2, 8)),
+    
+    (['A', 'T'],               ['A', 'T'], (2, 2)),
+    (['AA', 'A', 'TA'],        ['T'],      (1, 5)),
+    (['AAC', 'AA', 'TG', 'C'], ['T', 'C'], (3, 8)),
+    
     (['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG'], ['T', 'C'], (14, 28))
+    (['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG'], ['N'],      (0, 28))
 ])
 def test_process_strings(test_strs: Iterable[str], targets: Iterable[str], expected_counts: Tuple[int, int]) -> None:
     """Verify that proces_strings generates the correct counts."""
