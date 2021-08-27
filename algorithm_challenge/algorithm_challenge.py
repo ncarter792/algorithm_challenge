@@ -19,7 +19,7 @@ Doctests can be executed via: `python -m doctest -v algorithm_challenge_.py`.
 from __future__ import annotations
 
 from collections import defaultdict
-from typing      import Dict, Iterable, Iterator, Optional, Tuple
+from typing      import Iterable, Iterator
 
 
 # Store map from base to child index
@@ -51,7 +51,7 @@ class DnaBagNode:
         'value_count',
     )
 
-    children: Iterable[DnaBagNode | None]
+    children: list[DnaBagNode | None]
     prefix_count: int
     value_count: int
 
@@ -69,7 +69,7 @@ class DnaBag:
 
     """
 
-    def __init__(self, items: Iterable[str] | None) -> None:
+    def __init__(self, items: Iterable[str] | None = None) -> None:
         """Initialize the DNABag.
 
         Args:
@@ -81,32 +81,64 @@ class DnaBag:
             for item in items:
                 self.add(item)
 
-    def add(self, key: str) -> None:
-        """Insert key into node."""
-        node = self.root
+    def add(self, key: str) -> int:
+        """Insert key into the bag and return the number of times the key appears.
 
-        child_index = translate_dna(key)
+        Examples:
+            >>> bag = DnaBag()
+            >>> bag.add('A')
+            1
+            >>> bag.add('A')
+            2
+            >>> bag.add('ACGT')
+            1
+            >>> bag.add('GGG')
+            1
+            >>> bag.add('AC')
+            1
+            >>> bag.add('A')
+            3
 
-        for index in child_index:
+        """
+        assert self.root is not None  # tells mypy about the invariant
+
+        node: DnaBagNode = self.root
+
+        for index in translate_dna(key):
             node.prefix_count += 1
 
-            if not node.children[index]:
-                node.children[index] = DnaBagNode()
+            child = node.children[index]
+            if child is None:
+                child = node.children[index] = DnaBagNode()
+            node = child
 
-            node = node.children[index]
-
-        node.value_count += 1
         node.prefix_count += 1
+        node.value_count  += 1
 
-    def find(self, key: str) -> Optional[int]:
-        """Find value by key in node."""
-        for character in key:
-            if character in self.root.children:
-                node = self.root.children[character]
-            else:
-                return None
+        return node.value_count
 
-        return node.value
+    def __getitem__(self, key: str) -> int:
+        """Get count of times key appears in the bag.
+
+        Examples:
+            >>> bag = DnaBag()
+            >>> bag.add('A')
+            1
+            >>> bag.add('A')
+            2
+            >>> bag['A']
+            2
+
+        """
+        node = self.root
+
+        for index in translate_dna(key):
+            child = node.children[index]
+            if child is None:
+                return 0
+            node = child
+
+        return node.value_count
 
 
 def translate_dna(s: str) -> Iterator[int]:
@@ -117,45 +149,49 @@ def translate_dna(s: str) -> Iterator[int]:
         [1]
         >>> list(translate_dna('CAA'))
         [1, 0, 0]
+        >>> list(translate_dna('ACGTN'))
+        [0, 1, 2, 3, 4]
+        >>> list(translate_dna('acgtn'))
+        [0, 1, 2, 3, 4]
 
     """
     for character in s:
         yield DNA_MAP[character]
 
 
-def traverse(node: DnaBagNode) -> Iterable[Tuple[str, DnaBagNode]]:
+def traverse(node: DnaBagNode) -> Iterator[tuple[str, DnaBagNode]]:
     """Traverse the layers of the trie yielding base, node tuples.
-    
-    Args: 
-        node: node to begin traverse 
-    
-    Yields: 
-        tuples of base and child node 
-    
+
+    Args:
+        node: node to begin traverse
+
+    Yields:
+        tuples of base and child node
+
     """
     for base, child in zip('ACGTN', node.children):
         if child:
-            yield (base, child)
+            yield base, child
             yield from traverse(child)
 
 
-def process_strings(strings: Iterable[str], targets: Iterable[str]) -> Tuple[int, int]:
-    """Calculate processed string target count.
-
-    Example:
-        >>> strings = ['ACTG', 'AACT', 'TCAGG', 'TTGGA']
-        >>> targets = ['C', 'G']
-        >>> process_strings(strings, targets)
-        (8, 18)
+def process_strings(strings: Iterable[str], targets: Iterable[str]) -> tuple[int, int]:
+    """Calculate number of times a target character appears in one of the input strings using a DnaBag.
 
     Args:
         strings: list of DNA strings
         targets: target bases to count
 
+    Examples:
+        >>> strings = ['ACTG', 'AACT', 'TCAGG', 'TTGGA']
+        >>> targets = ['C', 'G']
+        >>> process_strings(strings, targets)
+        (8, 18)
+
     """
     trie = DnaBag(strings)
 
-    counts: Dict[str, int] = defaultdict(int)
+    counts: dict[str, int] = defaultdict(int)
     for base, node in traverse(trie.root):
         counts[base] += node.prefix_count
 
@@ -166,7 +202,7 @@ def process_strings(strings: Iterable[str], targets: Iterable[str]) -> Tuple[int
 
 
 def run() -> None:
-    """Generate a fractional count of target bases given a list of strings."""
+    """Run test case."""
     dna_strings = ['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG']
     targets     = ['A', 'T']
 
