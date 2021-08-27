@@ -5,7 +5,7 @@ Algorithm challenge for Delfi diagnostics
 
 To use this package::
 
-    pip install git+ssh://git@source.progenity.com:BioInformaticsCode/progenity_app_jarvis.git
+    pip install git+https://github.com/ncarter792/algorithm_challenge
 
 To run unit tests for this package, change to the package base directory and run::
 
