@@ -1,5 +1,5 @@
 # algorithm_challenge
-Algorithm challenge for Delfi diagnostics 
+Algorithm challenge package for Delfi diagnostics 
 
 ## Package installation and testing
 
@@ -14,7 +14,8 @@ To run unit tests for this package, change to the package base directory and run
 
     pytest
 
-Note - Tests for this package run all of the following: unit tests, doctests, flake8, and mypy. 
+Note - Tests for this package run all of the following: unit tests, doctests, flake8, and mypy. A build directory will 
+be generated with test output and coverage reports. 
 
 ## Background 
 This example implements a classical trie except the value is a count rather than a general value. 
