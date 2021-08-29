@@ -7,7 +7,7 @@ from typing      import Any, Iterable
 
 from pytest import mark, raises
 
-from algorithm_challenge.algorithm_challenge import DnaBag, translate_dna, traverse, process_strings
+from algorithm_challenge.algorithm_challenge import DnaTrie, translate_dna, traverse, process_trie
 
 
 @mark.parametrize('test_input, expected_output', [
@@ -18,7 +18,7 @@ from algorithm_challenge.algorithm_challenge import DnaBag, translate_dna, trave
     # Test simple conversions
     ('AAA', [0, 0, 0]),
     ('ACG', [0, 1, 2]),
-    ('CGT', [1, 2, 3]),
+    ('CGT', [1, 2, 4]),
 
     # Test empty
     ('', []),
@@ -40,43 +40,53 @@ def test_translate_dna_fails(test_input: Any, expected_error: Any) -> None:
         list(translate_dna(test_input))
 
 
-def test_DnaBag() -> None:
-    """Verify a DNABag is setup as expected."""
+def test_DnaTrie() -> None:
+    """Verify a DnaTrie is setup as expected.
+
+    Note - Child attribute indexes are: [A, C, G, N, T]
+
+    """
     test_strs = ['AAC', 'AA', 'TG', 'C']
-    bag = DnaBag(test_strs)
+    bag = DnaTrie(test_strs)
 
     # Test top level node
-    assert bag.root.prefix_count == 4    # Three strings generate suffixes from the root node
+    assert bag.root.item_count == 4    # Three strings generate suffixes from the root node
     assert bag.root.value_count  == 0    # root has no value
 
     assert not bag.root.children[2]  # Test G
-    assert not bag.root.children[4]  # Test N
+    assert not bag.root.children[3]  # Test N
 
     # Test sub-node A
     a = bag.root.children[0]
-    assert a.prefix_count == 2
+    assert a
+    assert a.item_count == 2
     assert a.value_count  == 0
 
     aa = a.children[0]
-    assert aa.prefix_count == 2
+    assert aa
+    assert aa.item_count == 2
     assert aa.value_count  == 1
 
     aac = aa.children[1]
-    assert aac.prefix_count == 1
+    assert aac
+    assert aac.item_count == 1
     assert aac.value_count  == 1
 
     # Test sub-node C
     c = bag.root.children[1]
-    assert c.prefix_count == 1
+    assert c
+    assert c.item_count == 1
     assert c.value_count  == 1
 
     # Test sub-node T
-    t = bag.root.children[3]
-    assert t.prefix_count == 1
+    t = bag.root.children[4]
+    assert t
+    assert t.item_count == 1
     assert t.value_count  == 0
 
     tg = t.children[2]
-    assert tg.prefix_count == 1
+    assert tg
+    assert tg.item_count == 1
     assert tg.value_count  == 1
 
 
@@ -91,30 +101,31 @@ def test_DnaBag() -> None:
 ])
 def test_traverse(test_strs: Iterable[str], expected_counts: dict[str, int]) -> None:
     """Verify that traverse unpacks a trie as expecetd."""
-    bag = DnaBag(test_strs)
+    bag = DnaTrie(test_strs)
 
     counts: dict[str, int] = defaultdict(int)
     for base, node in traverse(bag.root):
-        counts[base] += node.prefix_count
+        counts[base] += node.item_count
 
     assert counts == expected_counts
 
 
-@mark.parametrize('test_strs, targets, expected_counts', [
-    (['A'],       ['A'], (1, 1)),
-    (['A'],       ['G'], (0, 1)),
-    (['A', 'T'],  ['A'], (1, 2)),
-    (['AA'],      ['A'], (2, 2)),
-    (['AA'],      ['C'], (0, 2)),
-    (['AA', 'A'], ['A'], (3, 3)),
+@mark.parametrize('test_nodes, targets, expected_counts', [
+    (DnaTrie(['A']),       ['A'], (1, 1)),
+    (DnaTrie(['A']),       ['G'], (0, 1)),
+    (DnaTrie(['A', 'T']),  ['A'], (1, 2)),
+    (DnaTrie(['AA']),      ['A'], (2, 2)),
+    (DnaTrie(['AA']),      ['C'], (0, 2)),
+    (DnaTrie(['AA', 'A']), ['A'], (3, 3)),
 
-    (['A', 'T'],               ['A', 'T'], (2, 2)),
-    (['AA', 'A', 'TA'],        ['T'],      (1, 5)),
-    (['AAC', 'AA', 'TG', 'C'], ['T', 'C'], (3, 8)),
+    (DnaTrie(['A', 'T']),               ['A', 'T'], (2, 2)),
+    (DnaTrie(['AA', 'A', 'TA']),        ['T'],      (1, 5)),
+    (DnaTrie(['AAC', 'AA', 'TG', 'C']), ['T', 'C'], (3, 8)),
 
-    (['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG'], ['T', 'C'], (14, 28)),
-    (['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG'], ['N'],      (0, 28)),
+    (DnaTrie(['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG']), ['T', 'C'], (14, 28)),
+    (DnaTrie(['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG']), ['T', 'A'], (22, 28)),
+    (DnaTrie(['ACTGA', 'TAA', 'CTAA', 'TAAT', 'TAATT', 'ACT', 'ACTG']), ['N'],      (0, 28)),
 ])
-def test_process_strings(test_strs: Iterable[str], targets: Iterable[str], expected_counts: tuple[int, int]) -> None:
+def test_process_trie(test_nodes: DnaTrie, targets: Iterable[str], expected_counts: tuple[int, int]) -> None:
     """Verify that proces_strings generates the correct counts."""
-    assert process_strings(test_strs, targets) == expected_counts
+    assert process_trie(test_nodes, targets) == expected_counts
