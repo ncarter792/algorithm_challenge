@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "algorithm_challenge"
 version = "0.0.1"
-description = "Algorithm challenge for Delfi Diagnostics"
+description = "Algorithm challenge"
 authors = ["Nicole Carter"]
 include = ["README.rst", "setup.cfg"]
 
