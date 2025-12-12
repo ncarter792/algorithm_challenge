@@ -1,5 +1,5 @@
 # algorithm_challenge
-Algorithm challenge package for Delfi diagnostics 
+Candidate algorithm challenge package. 
 
 ## Background 
 Without publically sharing the entire challenge prompt, the ask is to basically implement a method that takes a trie and a set of characters, and returns the fraction of letters
