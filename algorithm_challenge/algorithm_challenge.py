@@ -1,4 +1,4 @@
-"""Algorithm challenge for Delfi Diagnostics.
+"""Algorithm challenge question for candidate interview.
 
 This module implements a method that generates a trie given a set of characters, and returns the fraction of letters
 in the list of strings used to build the trie that are members of the target set of characters.
